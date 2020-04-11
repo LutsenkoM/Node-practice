@@ -11,6 +11,7 @@ router.post('/users', async (req, res) => {
   // });
   try {
     await user.save();
+    await user.generateAuthToken();
     res.status(201).send(user);
   } catch (e) {
     res.status(400).send(e);
@@ -21,6 +22,7 @@ router.post('/users', async (req, res) => {
 router.post('/users/login', async (req,res) => {
   try {
     const user = await User.findByCredentials(req.body.email, req.body.password); // findByCredentials can be any name of function
+    await user.generateAuthToken();
     res.send(user);
   } catch (e) {
     res.status(400).send();
