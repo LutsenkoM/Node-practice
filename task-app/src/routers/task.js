@@ -24,16 +24,38 @@ router.post('/tasks', auth, async (req, res) => {
   }
 });
 
+// GET /tasks?completed=false
+// GET /tasks?limit=10&skip=5
+// GET /task?sortBy=createdAt_asc
 router.get('/tasks', auth, async (req,res) => {
   // Task.find({}).then((tasks) => {
   //     res.send(tasks);
   // }).catch((error) => {
   //     res.status(500).send(error);
   // });
+  const match = {};
+  const sort = {};
+  if (req.query.completed) {
+    match.completed = req.query.completed === 'true'
+  }
+
+  if (req.query.sortBy) {
+    const parts = req.query.sortBy.split(':');
+    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+  }
 
   try {
     // const tasks = await Task.find({owner: req.user._id});
-    await req.user.populate('tasks').execPopulate();
+    // await req.user.populate('tasks').execPopulate();
+    await req.user.populate({
+      path: 'tasks',
+      match, // filtering params
+      options: { // pagination params
+        limit: parseInt(req.query.limit),
+        skip: parseInt(req.query.skip),
+        sort
+      }
+    }).execPopulate();
     res.send(req.user.tasks);
   } catch (e) {
     res.status(500).send(e);
