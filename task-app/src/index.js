@@ -23,8 +23,8 @@ app.listen(port, () => {
     console.log('Server is up on port' + port)
 });
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+// const bcrypt = require('bcryptjs');
+// const jwt = require('jsonwebtoken');
 
 // const comparePasswordFunction = async () => {
 //     const pass = 'Red12345!';
@@ -47,17 +47,48 @@ const jwt = require('jsonwebtoken');
 //
 // jsonWebToken();
 
-const Task = require('./models/task');
-const User = require('./models/user');
+// const Task = require('./models/task');
+// const User = require('./models/user');
+//
+// const main = async () => {
+//     // const task = await Task.findById('5e932c7172ef016b08355333');
+//     // await task.populate('owner').execPopulate();
+//     // console.log(task.owner);
+//
+//     const user = await User.findById('5e932aaa785b786a0dcbfc9d');
+//     await user.populate('tasks').execPopulate();
+//     console.log(user.tasks);
+// };
+//
+// main();
 
-const main = async () => {
-    // const task = await Task.findById('5e932c7172ef016b08355333');
-    // await task.populate('owner').execPopulate();
-    // console.log(task.owner);
+// FILE UPLOAD
+const multer = require('multer');
+const upload = multer({
+    dest: 'images',
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, callback) {
+         if (!file.originalname.endsWith('.pdf')) {
+             return callback(new Error('please upload a PDF'))
+         }
 
-    const user = await User.findById('5e932aaa785b786a0dcbfc9d');
-    await user.populate('tasks').execPopulate();
-    console.log(user.tasks);
+        callback(undefined, true)
+
+        // callback(new Error('File must be a PDF'))
+        // callback(undefined, true)
+        // callback(undefined, false)
+    }
+});
+
+// Handling Express Errors
+const errorMiddleware = (req, res, next) => {
+    throw new Error('From my middleware');
 };
 
-main();
+app.post('/upload', upload.single('upload'), (req, res) => {
+    res.send()
+}, (error, req, res, next) => {
+    res.status(400).send({error: error.message})
+});
